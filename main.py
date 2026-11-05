@@ -21,9 +21,14 @@ def main():
     camera_idx = 0
     cap = cv2.VideoCapture(camera_idx)
 
-    # Đặt độ phân giải tối ưu để đạt FPS cao và mượt mà
-    cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
-    cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
+    # Đặt độ phân giải hiển thị lớn hơn (960x540, tỉ lệ chuẩn 16:9 sắc nét)
+    cap.set(cv2.CAP_PROP_FRAME_WIDTH, 960)
+    cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 540)
+
+    # Tạo cửa sổ hiển thị có thể tùy chỉnh kích thước hoặc phóng to
+    window_title = "Chrome Dino Gesture Controller"
+    cv2.namedWindow(window_title, cv2.WINDOW_NORMAL)
+    cv2.resizeWindow(window_title, 960, 540)
 
     if not cap.isOpened():
         print(f"[LỖI] Không thể kết nối với Camera (index={camera_idx}).")
@@ -112,7 +117,7 @@ def main():
             )
 
             # 6. Hiển thị cửa sổ OpenCV
-            cv2.imshow("Chrome Dino Gesture Controller", frame)
+            cv2.imshow(window_title, frame)
 
             # 7. Bắt phím bấm điều khiển từ người dùng
             key = cv2.waitKey(1) & 0xFF
@@ -138,3 +143,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
