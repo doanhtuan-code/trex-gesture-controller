@@ -181,60 +181,77 @@ class HUDDrawer:
         return frame
 
     def _draw_help_popup(self, frame, w: int, h: int):
-        """Vẽ bảng popup hướng dẫn chi tiết."""
-        box_w, box_h = 500, 310
+        """Vẽ bảng popup hướng dẫn chi tiết, căn chỉnh tự động theo kích thước khung hình."""
+        # Tự động tính kích thước hộp popup tỉ lệ với khung hình để không bao giờ bị tràn
+        box_w = min(620, int(w * 0.88))
+        box_h = min(410, int(h * 0.86))
         x1 = (w - box_w) // 2
         y1 = (h - box_h) // 2
         x2, y2 = x1 + box_w, y1 + box_h
 
+        # Nền đen trong suốt hiện đại
         overlay = frame.copy()
-        cv2.rectangle(overlay, (x1, y1), (x2, y2), (25, 25, 30), -1)
-        cv2.addWeighted(overlay, 0.9, frame, 0.1, 0, frame)
+        cv2.rectangle(overlay, (x1, y1), (x2, y2), (20, 20, 25), -1)
+        cv2.addWeighted(overlay, 0.92, frame, 0.08, 0, frame)
+
+        # Viền hộp popup
         cv2.rectangle(frame, (x1, y1), (x2, y2), self.COLOR_CYAN, 2)
 
+        # Tiêu đề
         title = "HUONG DAN CU CHI DIEU KHIEN DINO"
         cv2.putText(
             frame,
             title,
-            (x1 + 35, y1 + 35),
+            (x1 + 30, y1 + 36),
             cv2.FONT_HERSHEY_DUPLEX,
-            0.65,
+            0.62,
             self.COLOR_JUMP,
             2,
         )
 
+        # Đường kẻ phân cách dưới tiêu đề
+        cv2.line(frame, (x1 + 25, y1 + 48), (x2 - 25, y1 + 48), self.COLOR_GRAY, 1)
+
+        # Nội dung hướng dẫn
         lines = [
-            "- Che do FINGERS (So ngon tay):",
-            "   + Xoe 4 - 5 ngon: NHAY (Phim Space)",
-            "   + Nam chat ban tay (0 ngon): CUI (Mui ten Xuong)",
-            "   + 1 - 3 ngon hoac tha long: CHAY (Tha phim)",
-            "",
-            "- Che do ZONE (Vi tri ban tay):",
-            "   + Dua tay len vung tren: NHAY (Space)",
-            "   + Ha tay xuong vung duoi: CUI (Mui ten Xuong)",
-            "   + Tay o vung giua: CHAY BINH THUONG",
-            "",
-            "- Choi game: Mo trinh duyet go 'chrome://dino'",
-            "  Nhan phim 'H' de dong bang huong dan nay.",
+            ("CHE DO 1: FINGERS (So ngon tay - Khuyen dung):", self.COLOR_ACCENT, 0.48, 1),
+            ("   + Xoe 4 - 5 ngon        -> NHAY (Phim Space)", self.COLOR_JUMP, 0.45, 1),
+            ("   + Nam chat tay (0 ngon)  -> CUI (Mui ten Xuong)", self.COLOR_DUCK, 0.45, 1),
+            ("   + 1 - 3 ngon / Tha long  -> CHAY (Tha phim)", self.COLOR_WHITE, 0.45, 1),
+            ("", self.COLOR_WHITE, 0.45, 1),
+            ("CHE DO 2: ZONE (Vi tri cao/thap cua ban tay):", self.COLOR_ACCENT, 0.48, 1),
+            ("   + Dua tay len cao        -> NHAY (Space)", self.COLOR_JUMP, 0.45, 1),
+            ("   + Ha tay xuong thap      -> CUI (Down)", self.COLOR_DUCK, 0.45, 1),
+            ("   + Tay o vung giua        -> CHAY BINH THUONG", self.COLOR_WHITE, 0.45, 1),
+            ("", self.COLOR_WHITE, 0.45, 1),
+            ("MEO: Mo Chrome go 'chrome://dino', click vao trang de choi!", (100, 240, 255), 0.45, 1),
         ]
 
-        start_y = y1 + 70
-        for line in lines:
-            color = self.COLOR_WHITE
-            if "NHAY" in line:
-                color = self.COLOR_JUMP
-            elif "CUI" in line:
-                color = self.COLOR_DUCK
-            elif "FINGERS" in line or "ZONE" in line:
-                color = self.COLOR_ACCENT
+        curr_y = y1 + 75
+        for text, color, scale, thickness in lines:
+            if text:
+                cv2.putText(
+                    frame,
+                    text,
+                    (x1 + 30, curr_y),
+                    cv2.FONT_HERSHEY_SIMPLEX,
+                    scale,
+                    color,
+                    thickness,
+                )
+            curr_y += 24
 
-            cv2.putText(
-                frame,
-                line,
-                (x1 + 25, start_y),
-                cv2.FONT_HERSHEY_SIMPLEX,
-                0.46,
-                color,
-                1,
-            )
-            start_y += 22
+        # Nút hướng dẫn đóng ở chân popup
+        close_bar_y1 = y2 - 38
+        close_bar_y2 = y2 - 8
+        cv2.rectangle(frame, (x1 + 20, close_bar_y1), (x2 - 20, close_bar_y2), (40, 40, 50), -1)
+        cv2.rectangle(frame, (x1 + 20, close_bar_y1), (x2 - 20, close_bar_y2), self.COLOR_GRAY, 1)
+        cv2.putText(
+            frame,
+            "[ H ]  Nhan phim 'H' tren ban phim de dong bang huong dan nay",
+            (x1 + 45, close_bar_y2 - 10),
+            cv2.FONT_HERSHEY_SIMPLEX,
+            0.45,
+            (0, 255, 128),
+            1,
+        )
